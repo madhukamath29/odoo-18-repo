@@ -1,18 +1,25 @@
 #!/bin/bash
-cd /home/ubuntu/odoo18
+set -e  # Stop if any command fails
 
-# Install venv package if not already installed
+cd /home/ubuntu/odoo18 || exit 1
+
+# Install Python venv if not available
 sudo apt update -y
-sudo apt install -y python3-venv
+sudo apt install -y python3-venv python3-pip --no-install-recommends
 
-# Create a virtual environment
-python3 -m venv venv
+# Create virtual environment if not exists
+[ ! -d "venv" ] && python3 -m venv venv
 
-# Activate the virtual environment
+# Activate virtual environment
 source venv/bin/activate
 
-# Upgrade pip inside venv
-pip install --upgrade pip
+# Install dependencies quietly and clean cache to save space
+pip install --no-cache-dir --upgrade pip
+[ -f "requirements.txt" ] && pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies inside venv
-pip install -r requirements.txt
+# Deactivate virtual environment
+deactivate
+
+# Remove apt cache to free space
+sudo apt clean
+sudo rm -rf /var/lib/apt/lists/*
